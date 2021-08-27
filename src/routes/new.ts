@@ -15,7 +15,7 @@ const router = express.Router();
 const EXPIRATION_WINDOW_SECONDS = 15 * 60;
 
 router.post(
-  "api/orders",
+  "/api/orders",
   requireAuth,
   [
     body("ticketId")
