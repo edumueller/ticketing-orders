@@ -27,7 +27,7 @@ it("returns unauthorized if one user tries to delete another users order", async
     .send({ ticketId: ticket.id })
     .expect(201);
 
-  const { body: fetchedOrder } = await request(app)
+  await request(app)
     .delete(`/api/orders/${order.id}`)
     .set("Cookie", userTwo)
     .send()
