@@ -2,6 +2,7 @@ import request from "supertest";
 import { app } from "../../app";
 import { Ticket } from "../../models/ticket";
 import mongoose from "mongoose";
+import { Order, OrderStatus } from "../../models/order";
 
 it("returns 404 if order does not exist", async () => {
   await request(app)
@@ -33,7 +34,7 @@ it("returns unauthorized if one user tries to delete another users order", async
     .expect(401);
 });
 
-it("deletes the order", async () => {
+it("deletes (cancel) the order", async () => {
   const ticket = Ticket.build({
     title: "concert",
     price: 20,
@@ -48,11 +49,14 @@ it("deletes the order", async () => {
     .send({ ticketId: ticket.id })
     .expect(201);
 
-  const { body: fetchedOrder } = await request(app)
+  await request(app)
     .delete(`/api/orders/${order.id}`)
     .set("Cookie", user)
     .send()
     .expect(204);
 
-  expect(fetchedOrder.id).toEqual(order.id);
+  const updatedOrder = await Order.findById(order.id);
+  expect(updatedOrder!.status).toEqual(OrderStatus.Cancelled);
 });
+
+it.todo("emits an order:cancelled event");
