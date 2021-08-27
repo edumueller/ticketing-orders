@@ -3,7 +3,7 @@ import { app } from "../../app";
 import { Ticket } from "../../models/ticket";
 import mongoose from "mongoose";
 
-it("returns 404 if ticket does not exist", async () => {
+it("returns 404 if order does not exist", async () => {
   await request(app)
     .get(`/api/orders/${mongoose.Types.ObjectId()}`)
     .set("Cookie", global.signin())
