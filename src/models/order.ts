@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { OrderStatus } from "@devneering/common";
-import { TicketDoc } from "./tickets";
+import { TicketDoc } from "./ticket";
 // An interface that describes the properties
 // that are required to create a new Order
 interface OrderAttrs {
