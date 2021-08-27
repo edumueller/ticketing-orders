@@ -1,7 +1,15 @@
 import mongoose from "mongoose";
 import express, { Request, Response } from "express";
-import { requireAuth, validateRequest } from "@devneering/common";
+import {
+  NotFoundError,
+  requireAuth,
+  validateRequest,
+  OrderStatus,
+  BadRequestError,
+} from "@devneering/common";
 import { body } from "express-validator";
+import { Ticket } from "../models/ticket";
+import { Order } from "../models/order";
 
 const router = express.Router();
 
@@ -16,7 +24,26 @@ router.post(
       .withMessage("TicketId must be provided"),
   ],
   validateRequest,
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
+    const { ticketId } = req.body;
+
+    // Find the ticket the user is trying to order in the DB
+    const ticket = await Ticket.findById(ticketId);
+    if (!ticket) {
+      throw new NotFoundError();
+    }
+
+    // Make sure the ticket is not already reserved
+    const reservation = await ticket.isReserved();
+    if (reservation) {
+      throw new BadRequestError("Ticket is not available");
+    }
+
+    // Calculate an expiration date for the order
+
+    // Create a order referencing the ticket
+
+    // Publish an event saying an order was created
     res.send({});
   }
 );
