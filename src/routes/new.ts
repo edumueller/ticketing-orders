@@ -11,6 +11,8 @@ import { Ticket } from "../models/ticket";
 
 const router = express.Router();
 
+const EXPIRATION_WINDOW_SECONDS = 15 * 60;
+
 router.post(
   "api/orders",
   requireAuth,
@@ -38,6 +40,8 @@ router.post(
     }
 
     // Calculate an expiration date for the order
+    const expiration = new Date();
+    expiration.setSeconds(expiration.getSeconds() + EXPIRATION_WINDOW_SECONDS);
 
     // Create a order referencing the ticket
 
