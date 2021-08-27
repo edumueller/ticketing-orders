@@ -8,6 +8,7 @@ import {
 } from "@devneering/common";
 import { body } from "express-validator";
 import { Ticket } from "../models/ticket";
+import { Order, OrderStatus } from "../models/order";
 
 const router = express.Router();
 
@@ -43,10 +44,17 @@ router.post(
     const expiration = new Date();
     expiration.setSeconds(expiration.getSeconds() + EXPIRATION_WINDOW_SECONDS);
 
-    // Create a order referencing the ticket
+    // Build the order referencing the ticket and save it
+    const order = Order.build({
+      status: OrderStatus.Created,
+      userId: req.currentUser!.id,
+      expiresAt: expiration,
+      ticket,
+    });
+    await order.save();
 
     // Publish an event saying an order was created
-    res.send({});
+    res.status(201).send(order);
   }
 );
 
