@@ -4,12 +4,10 @@ import {
   NotFoundError,
   requireAuth,
   validateRequest,
-  OrderStatus,
   BadRequestError,
 } from "@devneering/common";
 import { body } from "express-validator";
 import { Ticket } from "../models/ticket";
-import { Order } from "../models/order";
 
 const router = express.Router();
 
