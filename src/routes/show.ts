@@ -1,18 +1,19 @@
+import express, { Request, Response } from 'express';
 import {
   requireAuth,
   NotFoundError,
   NotAuthorizedError,
-} from "@devneering/common";
-import express, { Request, Response } from "express";
-import { Order } from "../models/order";
+} from '@devneering/common';
+import { Order } from '../models/order';
 
 const router = express.Router();
 
 router.get(
-  "/api/orders/:id",
+  '/api/orders/:orderId',
   requireAuth,
   async (req: Request, res: Response) => {
-    const order = await Order.findById(req.params.id).populate("ticket");
+    const order = await Order.findById(req.params.orderId).populate('ticket');
+
     if (!order) {
       throw new NotFoundError();
     }

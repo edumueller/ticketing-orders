@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
-import { updateIfCurrentPlugin } from "mongoose-update-if-current";
-import { Order, OrderStatus } from "./order";
+import mongoose from 'mongoose';
+import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
+import { Order, OrderStatus } from './order';
 
 interface TicketAttrs {
   id: string;
@@ -8,7 +8,7 @@ interface TicketAttrs {
   price: number;
 }
 
-interface TicketDoc extends mongoose.Document {
+export interface TicketDoc extends mongoose.Document {
   title: string;
   price: number;
   version: number;
@@ -17,6 +17,10 @@ interface TicketDoc extends mongoose.Document {
 
 interface TicketModel extends mongoose.Model<TicketDoc> {
   build(attrs: TicketAttrs): TicketDoc;
+  findByEvent(event: {
+    id: string;
+    version: number;
+  }): Promise<TicketDoc | null>;
 }
 
 const ticketSchema = new mongoose.Schema(
@@ -41,6 +45,15 @@ const ticketSchema = new mongoose.Schema(
   }
 );
 
+ticketSchema.set('versionKey', 'version');
+ticketSchema.plugin(updateIfCurrentPlugin);
+
+ticketSchema.statics.findByEvent = (event: { id: string; version: number }) => {
+  return Ticket.findOne({
+    _id: event.id,
+    version: event.version - 1,
+  });
+};
 ticketSchema.statics.build = (attrs: TicketAttrs) => {
   return new Ticket({
     _id: attrs.id,
@@ -48,12 +61,10 @@ ticketSchema.statics.build = (attrs: TicketAttrs) => {
     price: attrs.price,
   });
 };
-
-// Run query to look at all orders, find the order where
-// the ticket is not cancelled
 ticketSchema.methods.isReserved = async function () {
+  // this === the ticket document that we just called 'isReserved' on
   const existingOrder = await Order.findOne({
-    ticket: this as TicketDoc,
+    ticket: this as any,
     status: {
       $in: [
         OrderStatus.Created,
@@ -66,9 +77,6 @@ ticketSchema.methods.isReserved = async function () {
   return !!existingOrder;
 };
 
-ticketSchema.set("versionKey", "version");
-ticketSchema.plugin(updateIfCurrentPlugin);
+const Ticket = mongoose.model<TicketDoc, TicketModel>('Ticket', ticketSchema);
 
-const Ticket = mongoose.model<TicketDoc, TicketModel>("Ticket", ticketSchema);
-
-export { Ticket, TicketDoc };
+export { Ticket };
